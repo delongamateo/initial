@@ -14,7 +14,7 @@ export function CreatePost() {
 
   const { mutate: sendMessage } = useMutation({
     mutationFn: async ({ message }: { message: string }) => {
-      let response;
+      let response: Response;
       try {
         response = await fetch("/api/message", {
           method: "POST",
@@ -37,8 +37,8 @@ export function CreatePost() {
         throw new Error("Failed to send message");
       }
 
-      const data = await response.json();
-      return data;
+     /*  const data = await response.json(); */
+      return "data";
     },
   });
 

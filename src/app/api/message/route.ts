@@ -2,7 +2,7 @@ import { openai } from "~/utils/openai";
 import { NextRequest, NextResponse } from "next/server";
 
 export const POST = async (req: NextRequest) => {
-  const body = await req.json();
+/*   const body = await req.json();
   const response = await openai.chat.completions
     .create({
       model: "gpt-3.5-turbo",
@@ -26,11 +26,8 @@ export const POST = async (req: NextRequest) => {
         },
       ],
     })
-    .catch((err) => {
-      return err;
-    });
 
-  return NextResponse.json({ response });
+  return NextResponse.json({ response }); */
 
-  return response;
+  return "response";
 };
