@@ -52,18 +52,19 @@ export function CreatePost({ session }: { session: Session | null }) {
 
   const createPost = api.post.create.useMutation({
     onSuccess: () => {
-      router.refresh();
       setName("");
       utils.post.invalidate();
     },
   });
 
-  const { data, isLoading } = api.post.getLatest.useQuery();
+  const {data: a} = api.post.getSecretMessage.useQuery()
+
+  const { data, isLoading } = api.post.getPosts.useQuery();
 
   if (!session) {
     return (
       <div className="w-full text-center">
-        <p className="text-2xl text-white">Sign in to create post</p>
+        <p className="text-2xl text-white">Sign in to create post {a}</p>
       </div>
     );
   }
