@@ -2,15 +2,23 @@
 import { Button } from "~/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { api } from "~/trpc/react";
 import { useTheme } from "next-themes";
+import { Session } from "next-auth";
+import { Skeleton } from "~/components/ui/skeleton";
 
-export function CreatePost() {
+export function CreatePost({ session }: { session: Session | null }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const { setTheme } = useTheme();
+
+  useEffect(() => {
+    setTheme("dark");
+  }, []);
+
+  const utils = api.useUtils();
 
   const { mutate: sendMessage } = useMutation({
     mutationFn: async ({ message }: { message: string }) => {
@@ -37,7 +45,7 @@ export function CreatePost() {
         throw new Error("Failed to send message");
       }
 
-     /*  const data = await response.json(); */
+      /*  const data = await response.json(); */
       return "data";
     },
   });
@@ -46,28 +54,52 @@ export function CreatePost() {
     onSuccess: () => {
       router.refresh();
       setName("");
+      utils.post.invalidate();
     },
   });
 
-  return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
+  const { data, isLoading } = api.post.getLatest.useQuery();
 
-        setTheme("dark");
-      }}
-      className="flex flex-col gap-2"
-    >
-      <input
-        type="text"
-        placeholder="Title"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="w-full rounded-full px-4 py-2 text-black"
-      />
-      <Button type="submit" variant="secondary" disabled={createPost.isLoading}>
-        {createPost.isLoading ? "Submitting..." : "Submit"}
-      </Button>
-    </form>
+  if (!session) {
+    return (
+      <div className="w-full text-center">
+        <p className="text-2xl text-white">Sign in to create post</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          createPost.mutate({ name });
+        }}
+        className="flex flex-col gap-2"
+      >
+        <input
+          type="text"
+          placeholder="Title"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full rounded-full px-4 py-2 text-black"
+        />
+        <Button
+          type="submit"
+          variant="secondary"
+          disabled={createPost.isLoading}
+        >
+          {createPost.isLoading ? "Submitting..." : "Submit"}
+        </Button>
+      </form>
+
+      <div className="mt-8">
+        {isLoading ? (
+          <Skeleton className="h-4 w-[250px]" />
+        ) : (
+          <p className="text-2xl text-white">{data?.name}</p>
+        )}
+      </div>
+    </>
   );
 }
